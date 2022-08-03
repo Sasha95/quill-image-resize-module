@@ -1,9 +1,9 @@
-import Quill from "quill";
 import defaultsDeep from 'lodash/defaultsDeep';
+import Quill from "quill";
 import DefaultOptions from './DefaultOptions';
 import { DisplaySize } from './modules/DisplaySize';
-import { Toolbar } from './modules/Toolbar';
 import { Resize } from './modules/Resize';
+import { Toolbar } from './modules/Toolbar';
 
 const knownModules = { DisplaySize, Toolbar, Resize };
 
@@ -17,7 +17,7 @@ export default class ImageResize {
 	constructor(quill, options = {}) {
 		// save the quill reference and options
 		this.quill = quill;
-
+		this.body = document.getElementsByTagName('body')[0];
 		// Apply the options to our defaults, and stash them for later
 		// defaultsDeep doesn't do arrays as you'd expect, so we'll need to apply the classes array from options separately
 		let moduleClasses = false;
@@ -42,7 +42,7 @@ export default class ImageResize {
 		this.quill.root.addEventListener('scroll', this.handleScroll, false);
 
 		this.quill.root.parentNode.style.position = this.quill.root.parentNode.style.position || 'relative';
-
+		this.body.addEventListener('click', this.handleClick, false);
 		// setup modules
 		this.moduleClasses = this.options.modules;
 
@@ -85,6 +85,12 @@ export default class ImageResize {
 	};
 
 	handleClick = (evt) => {
+		const isClickOnEditor = evt.path.find(el => el.className === 'ql-editor');
+		console.log('ImageResize ~ evt', isClickOnEditor);
+		if (!isClickOnEditor) {
+			this.hide();
+			return;
+		}
 		if (evt.target && evt.target.tagName && evt.target.tagName.toUpperCase() === 'IMG') {
 			if (this.img === evt.target) {
 				// we are already focused on this image
